@@ -12,6 +12,22 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 // 导入自己的样式
 import './assets/css/index.css'
+// 导入axios
+import axios from 'axios'
+// 将axios添加到vue的原型上
+Vue.prototype.$http = axios
+// 配置基准路径
+axios.defaults.baseURL = 'http://localhost:8888/api/private/v1'
+
+// 请求拦截器
+// 说明:因为只要是axios发送的请求 都会执行请求拦截器中的代码
+// 所以 可以在请求拦截器中 一次性添加请求头
+axios.interceptors.request.use(config => {
+  // 同意添加Authorization请求头
+  config.headers.Authorization = localStorage.getItem('token')
+  return config
+})
+
 // 安装插件
 Vue.use(ElementUI)
 

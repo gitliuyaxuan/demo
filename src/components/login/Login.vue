@@ -48,30 +48,23 @@ export default {
   },
   methods: {
     // 表单提交的代码逻辑
-    submitForm (formName) {
-      // 通过$refs获取到组件对象 并且调用组件的validate方法 进行表单验证
-      this.$refs[formName].validate(valid => {
-        // valid 形参表示 表单验证是否成功
-        if (!valid) {
-          // 验证失败的时候 代码中不需要任何处理 因为 错误信息都已经在页面中展示给用户了
-          return false
+    async submitForm (formName) {
+      try {
+        // 表单验证
+        await this.$refs[formName].validate()
+        // 表单验证成功后 发送请求 完成登录功能
+        const res = await axios.post('http://localhost:8888/api/private/v1/login', this.loginForm)
+        if (res.data.meta.status === 200) {
+          localStorage.setItem('token', res.data.data.token)
+          this.$router.push({name: 'home'})
+        } else {
+          this.$message({
+            message: res.data.meta.msg,
+            type: 'error',
+            duration: 1000
+          })
         }
-        // 表单验证成功
-        // 1 获取到用户名和密码
-        // 2 调用登录接口 完成登录
-        axios.post('http://localhost:8888/api/private/v1/login', this.loginForm).then(res => {
-          if (res.data.meta.status === 200) {
-            localStorage.setItem('token', res.data.data.token)
-            this.$router.push({name: 'home'})
-          } else {
-            this.$message({
-              message: res.data.meta.msg,
-              type: 'error',
-              duration: 1000
-            })
-          }
-        })
-      })
+      } catch (e) {}
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()
